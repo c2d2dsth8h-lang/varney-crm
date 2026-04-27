@@ -701,7 +701,8 @@ const TL=[
 // STATE
 // ═══════════════════════════════════════════════════
 let db={clients:[]};
-let scriptUrl=localStorage.getItem(SKEY)||'';
+let scriptUrl=localStorage.getItem(SKEY)||'https://sheetdb.io/api/v1/v9qme942cvp99';
+if(!localStorage.getItem(SKEY)) localStorage.setItem(SKEY,'https://sheetdb.io/api/v1/v9qme942cvp99');
 let apiKey=localStorage.getItem(AKEY)||'';
 let cid=null, cv='dashboard', pv='pipeline', af='all', ot='Email';
 let syncTimer=null, toastTimer=null;
@@ -1507,30 +1508,64 @@ function syncToSheets(silent){
   if(!scriptUrl) return;
   const dot=document.getElementById('syncDot');
   dot.style.background='var(--yellow)';
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),15000);
-  fetch(scriptUrl,{
-    method:'POST',
-    body:JSON.stringify(db),
-    headers:{'Content-Type':'application/json'},
-    signal:controller.signal,
-    mode:'no-cors'
+
+  // Flatten clients into rows for SheetDB
+  const rows = db.clients.map(c => ({
+    id: c.id||'',
+    bizName: c.bizName||'',
+    owner: c.owner||'',
+    industry: c.industry||'',
+    stage: c.stage||'',
+    phone: c.phone||'',
+    email: c.email||'',
+    website: c.website||'',
+    facebook: c.facebook||'',
+    fee: c.fee||'',
+    adSpend: c.adSpend||'',
+    jobValue: c.jobValue||'',
+    intel: (c.intel||'').substr(0,500),
+    angle: c.angle||'',
+    strategy: (c.strategy||'').substr(0,500),
+    notes: c.notes||'',
+    stage_updated: c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : '',
+    created: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
+    outreach_count: (c.outreach||[]).length,
+    discovery_count: (c.discovery||[]).filter(d=>d&&d.trim()).length,
+    onboarding_count: (c.onboarding||[]).filter(Boolean).length
+  }));
+
+  // First delete all existing rows then insert fresh
+  fetch(scriptUrl, {
+    method: 'DELETE',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({"limit":"all"})
   })
-  .then(()=>{
-    clearTimeout(timeout);
+  .then(() => {
+    if(rows.length === 0){
+      dot.style.background='var(--green)';
+      if(!silent)showToast('☁️ Synced to Google Sheets');
+      return;
+    }
+    return fetch(scriptUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(rows)
+    });
+  })
+  .then(r => {
+    if(!r) return;
+    return r.json();
+  })
+  .then(data => {
+    if(!data) return;
     dot.style.background='var(--green)';
-    localStorage.setItem('varney_last_sync',Date.now());
+    localStorage.setItem('varney_last_sync', Date.now());
     if(!silent)showToast('☁️ Synced to Google Sheets');
   })
-  .catch(err=>{
-    clearTimeout(timeout);
-    if(err.name==='AbortError'){
-      dot.style.background='var(--yellow)';
-      if(!silent)showToast('Sync slow — data may still be saving');
-    } else {
-      dot.style.background='var(--red)';
-      if(!silent)showToast('Sync failed — check connection');
-    }
+  .catch(err => {
+    dot.style.background='var(--red)';
+    if(!silent)showToast('Sync failed — check connection');
+    console.error('Sync error:', err);
   });
 }
 
