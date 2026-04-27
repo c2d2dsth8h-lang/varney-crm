@@ -1534,30 +1534,29 @@ function syncToSheets(silent){
     onboarding_count: (c.onboarding||[]).filter(Boolean).length
   }));
 
-  // First delete all existing rows then insert fresh
-  fetch(scriptUrl, {
+  // Delete all rows then insert fresh using SheetDB format
+  fetch(scriptUrl + '/all', {
     method: 'DELETE',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({"limit":"all"})
+    headers: {'Content-Type': 'application/json'}
   })
   .then(() => {
     if(rows.length === 0){
       dot.style.background='var(--green)';
       if(!silent)showToast('☁️ Synced to Google Sheets');
-      return;
+      return Promise.resolve(null);
     }
+    // SheetDB requires data wrapped in {data: [...]}
     return fetch(scriptUrl, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(rows)
+      body: JSON.stringify({data: rows})
     });
   })
   .then(r => {
-    if(!r) return;
+    if(!r) return null;
     return r.json();
   })
   .then(data => {
-    if(!data) return;
     dot.style.background='var(--green)';
     localStorage.setItem('varney_last_sync', Date.now());
     if(!silent)showToast('☁️ Synced to Google Sheets');
