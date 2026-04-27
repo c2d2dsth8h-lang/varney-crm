@@ -1505,13 +1505,33 @@ function updateSyncUI(){
 
 function syncToSheets(silent){
   if(!scriptUrl) return;
-  fetch(scriptUrl,{method:'POST',body:JSON.stringify(db),headers:{'Content-Type':'application/json'}})
-  .then(r=>r.json())
-  .then(data=>{
-    document.getElementById('syncDot').style.background=data.status==='ok'?'var(--green)':'var(--red)';
-    if(!silent)showToast(data.status==='ok'?'☁️ Synced to Google Sheets':'Sync error — check URL');
+  const dot=document.getElementById('syncDot');
+  dot.style.background='var(--yellow)';
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
+  fetch(scriptUrl,{
+    method:'POST',
+    body:JSON.stringify(db),
+    headers:{'Content-Type':'application/json'},
+    signal:controller.signal,
+    mode:'no-cors'
   })
-  .catch(()=>{document.getElementById('syncDot').style.background='var(--red)';if(!silent)showToast('Sync failed');});
+  .then(()=>{
+    clearTimeout(timeout);
+    dot.style.background='var(--green)';
+    localStorage.setItem('varney_last_sync',Date.now());
+    if(!silent)showToast('☁️ Synced to Google Sheets');
+  })
+  .catch(err=>{
+    clearTimeout(timeout);
+    if(err.name==='AbortError'){
+      dot.style.background='var(--yellow)';
+      if(!silent)showToast('Sync slow — data may still be saving');
+    } else {
+      dot.style.background='var(--red)';
+      if(!silent)showToast('Sync failed — check connection');
+    }
+  });
 }
 
 function schedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToSheets(true),3000);}
