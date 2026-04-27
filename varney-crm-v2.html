@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Varney Digital Media — CRM v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#080810;--s1:#0f0f1a;--s2:#161625;--s3:#1e1e30;
+  --border:#2a2a40;--border2:#3a3a55;
+  --accent:#6c63ff;--accent2:#9d97ff;--accent3:#c8c5ff;
+  --orange:#ff6b35;--green:#00d68f;--yellow:#ffd166;--red:#ff4757;--blue:#4ecdc4;--pink:#ff6b9d;
+  --text:#e8e6ff;--text2:#9994cc;--text3:#5a5880;
+  --glow:rgba(108,99,255,0.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(108,99,255,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(78,205,196,0.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── NAV ── */
+.nav{background:rgba(15,15,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.brand-gem{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--blue));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:white;box-shadow:0 0 20px rgba(108,99,255,0.4);}
+.brand-text{line-height:1;}
+.brand-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text);}
+.brand-sub{font-size:9px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;}
+.nav-right{display:flex;align-items:center;gap:6px;}
+.nav-icon{width:34px;height:34px;background:var(--s2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;transition:all 0.2s;flex-shrink:0;}
+.nav-icon:active{background:var(--s3);transform:scale(0.95);}
+.nav-icon.pulse::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(1.3);}}
+.sync-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--text3);}
+.add-btn{background:linear-gradient(135deg,var(--accent),#8b85ff);color:white;border:none;border-radius:9px;padding:8px 14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(108,99,255,0.3);transition:all 0.2s;}
+.add-btn:active{transform:scale(0.96);}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:59px;z-index:299;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:10px 16px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;letter-spacing:0.5px;display:flex;align-items:center;gap:5px;}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.badge{background:var(--accent);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px;}
+.badge.red{background:var(--red);}
+
+/* ── VIEWS ── */
+.view{display:none;padding:14px;padding-bottom:60px;position:relative;z-index:1;}
+.view.active{display:block;}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);}
+.stat.g::after{background:var(--green);}
+.stat.o::after{background:var(--orange);}
+.stat.y::after{background:var(--yellow);}
+.stat.p::after{background:var(--pink);}
+.stat.b::after{background:var(--blue);}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text);line-height:1;letter-spacing:1px;}
+.stat-label{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
+.stat-trend{font-size:10px;margin-top:4px;}
+.trend-up{color:var(--green);}
+.trend-warn{color:var(--yellow);}
+
+/* ── PIPELINE ── */
+.pipe{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px;}
+.pipe::-webkit-scrollbar{display:none;}
+.pipe-node{flex-shrink:0;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;min-width:70px;cursor:pointer;transition:all 0.2s;}
+.pipe-node:active{border-color:var(--accent);}
+.pipe-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);line-height:1;}
+.pipe-lbl{font-size:8px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+.pipe-arrow{color:var(--text3);font-size:10px;flex-shrink:0;}
+
+/* ── SECTION TITLE ── */
+.stitle{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── CARDS ── */
+.cards{display:flex;flex-direction:column;gap:8px;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+.card.stale::before{background:var(--red);}
+.card.warm::before{background:var(--yellow);}
+.card.hot::before{background:var(--green);}
+.card:active{border-color:var(--accent);background:var(--s2);}
+.card-top{display:flex;align-items:flex-start;gap:10px;}
+.avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:white;flex-shrink:0;}
+.av0{background:linear-gradient(135deg,#667eea,#764ba2);}
+.av1{background:linear-gradient(135deg,#f093fb,#f5576c);}
+.av2{background:linear-gradient(135deg,#4facfe,#00f2fe);}
+.av3{background:linear-gradient(135deg,#43e97b,#38f9d7);}
+.av4{background:linear-gradient(135deg,#fa709a,#fee140);}
+.av5{background:linear-gradient(135deg,#a18cd1,#fbc2eb);}
+.av6{background:linear(135deg,#ffecd2,#fcb69f);}
+.card-info{flex:1;}
+.card-name{font-weight:700;font-size:14px;color:var(--text);}
+.card-meta{font-size:11px;color:var(--text3);margin-top:1px;}
+.pill{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:10px;flex-shrink:0;white-space:nowrap;}
+.pill-prospect{background:rgba(108,99,255,0.15);color:var(--accent2);}
+.pill-researched{background:rgba(78,205,196,0.15);color:var(--blue);}
+.pill-outreach{background:rgba(255,209,102,0.15);color:var(--yellow);}
+.pill-call{background:rgba(255,107,157,0.15);color:var(--pink);}
+.pill-proposal{background:rgba(255,107,53,0.15);color:var(--orange);}
+.pill-active{background:rgba(0,214,143,0.15);color:var(--green);}
+.pill-inactive{background:rgba(90,88,128,0.15);color:var(--text3);}
+.card-bottom{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.ms{flex:1;}
+.ms-val{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--text);}
+.ms-lbl{font-size:9px;color:var(--text3);letter-spacing:0.5px;}
+.stale-flag{position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;animation:pulse 2s infinite;}
+.empty{text-align:center;padding:40px 16px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:8px;}
+.empty-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text2);margin-bottom:4px;}
+.empty-sub{font-size:12px;line-height:1.5;}
+
+/* ── AI TOOLS PANEL ── */
+.ai-panel{background:linear-gradient(135deg,rgba(108,99,255,0.08),rgba(78,205,196,0.05));border:1px solid rgba(108,99,255,0.25);border-radius:16px;padding:16px;margin-bottom:16px;}
+.ai-panel-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--accent2);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.ai-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ai-tool{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.2s;text-align:left;}
+.ai-tool:active{border-color:var(--accent);background:var(--s3);}
+.ai-tool-icon{font-size:20px;margin-bottom:6px;}
+.ai-tool-name{font-weight:700;font-size:12px;color:var(--text);line-height:1.2;}
+.ai-tool-desc{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.3;}
+
+/* ── DETAIL ── */
+.dheader{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.back{width:36px;height:36px;background:var(--s2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all 0.2s;}
+.back:active{background:var(--s3);}
+.dname{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;line-height:1;}
+.dsub{font-size:11px;color:var(--text3);margin-top:1px;}
+
+/* ── STAGE SELECTOR ── */
+.stage-sel{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;}
+.stage-sel::-webkit-scrollbar{display:none;}
+.sopt{flex-shrink:0;padding:6px 10px;border-radius:16px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--text3);transition:all 0.2s;white-space:nowrap;letter-spacing:0.5px;}
+.sopt.sel{border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,0.1);}
+
+/* ── TOOL GRID ── */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.tbtn{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.2s;}
+.tbtn:active{border-color:var(--accent);}
+.tbtn.coming{opacity:0.35;cursor:not-allowed;}
+.ticon{font-size:20px;margin-bottom:5px;}
+.tname{font-weight:700;font-size:12px;color:var(--text);}
+.tdesc{font-size:10px;color:var(--text3);margin-top:1px;line-height:1.3;}
+.ctag{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-top:3px;}
+
+/* ── FORMS ── */
+.fs{margin-bottom:12px;}
+.fl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;display:block;}
+.fi,.fta,.fse{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+.fi:focus,.fta:focus,.fse:focus{border-color:var(--accent);}
+.fi::placeholder,.fta::placeholder{color:var(--text3);}
+.fta{resize:none;line-height:1.5;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* ── KPI TRACKER ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.kpi-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);line-height:1;}
+.kpi-lbl{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.kpi-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+.kpi-bar{height:100%;border-radius:2px;transition:width 0.5s ease;}
+.bar-good{background:var(--green);}
+.bar-warn{background:var(--yellow);}
+.bar-bad{background:var(--red);}
+.kpi-status{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+/* ── OUTREACH LOG ── */
+.oe{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;}
+.oe-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.oe-type{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);}
+.oe-date{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.oe-body{font-size:12px;color:var(--text2);line-height:1.5;white-space:pre-wrap;max-height:80px;overflow:hidden;position:relative;}
+.oe-body.expanded{max-height:none;}
+.oe-expand{font-size:10px;color:var(--accent2);cursor:pointer;margin-top:4px;display:inline-block;}
+.oe-result{margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:11px;color:var(--green);}
+.oe-result.no-response{color:var(--yellow);}
+
+/* ── RESEARCH BLOCK ── */
+.rblock{background:var(--s2);border:1px solid rgba(108,99,255,0.2);border-radius:12px;padding:12px;margin-bottom:10px;}
+.rblock-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;}
+
+/* ── HEALTH SCORE ── */
+.health-bar{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;}
+.health-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.health-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.health-label{font-size:11px;color:var(--text2);flex:1;}
+.health-track{flex:2;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.health-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
+.health-score-big{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;text-align:center;margin:8px 0 4px;}
+.health-label-big{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);text-align:center;}
+
+/* ── FOLLOW UP ALERTS ── */
+.alert-card{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.25);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;}
+.alert-title{font-size:13px;font-weight:600;color:var(--text);}
+.alert-sub{font-size:11px;color:var(--red);margin-top:2px;}
+
+/* ── AI RESPONSE ── */
+.ai-response{background:linear-gradient(135deg,rgba(108,99,255,0.08),rgba(78,205,196,0.05));border:1px solid rgba(108,99,255,0.2);border-radius:14px;padding:14px;margin-top:10px;}
+.ai-response-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ai-badge{background:linear-gradient(135deg,var(--accent),var(--blue));color:white;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:6px;}
+.ai-response-body{font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap;}
+.ai-copy-btn{margin-top:8px;font-size:10px;font-weight:600;color:var(--accent2);cursor:pointer;background:none;border:none;font-family:'Space Grotesk',sans-serif;padding:0;letter-spacing:0.5px;}
+.ai-loading{display:flex;align-items:center;gap:8px;padding:12px 0;color:var(--text3);font-size:12px;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:aidot 1.4s infinite;}
+.ai-dot:nth-child(2){animation-delay:0.2s;}
+.ai-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes aidot{0%,80%,100%{transform:scale(0.6);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+
+/* ── DISCOVERY / ONBOARDING ── */
+.qblock{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;transition:border-color 0.3s;}
+.qblock.filled{border-color:rgba(108,99,255,0.4);}
+.qnum-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.qnum{background:var(--s3);color:var(--accent2);font-family:'Bebas Neue',sans-serif;font-size:14px;padding:2px 7px;border-radius:5px;letter-spacing:1px;}
+.qblock.filled .qnum{background:var(--accent);color:white;}
+.qtitle{font-size:13px;font-weight:500;color:var(--text);line-height:1.3;}
+.qhint{font-size:10px;color:var(--text3);margin-bottom:7px;line-height:1.4;}
+.ci{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:12px;display:flex;align-items:flex-start;gap:10px;margin-bottom:7px;cursor:pointer;}
+.ci.done{border-color:rgba(0,214,143,0.3);background:rgba(0,214,143,0.04);}
+.ci.done .ci-title{text-decoration:line-through;color:var(--text3);}
+.cicheck{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;transition:all 0.2s;}
+.ci.done .cicheck{background:var(--green);border-color:var(--green);color:white;}
+.ci-title{font-size:12px;font-weight:500;color:var(--text);line-height:1.3;}
+.ci-note{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.3;}
+.ctag2{display:inline-block;font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:6px;margin-top:3px;}
+.req{background:rgba(255,71,87,0.15);color:var(--red);}
+.asap{background:rgba(255,209,102,0.15);color:var(--yellow);}
+.opt{background:rgba(108,99,255,0.15);color:var(--accent2);}
+.tl-wrap{position:relative;padding-left:28px;}
+.tl-wrap::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:var(--border);}
+.tli{position:relative;margin-bottom:10px;}
+.tldot{position:absolute;left:-23px;top:13px;width:16px;height:16px;border-radius:50%;background:var(--s3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:var(--text3);}
+.tli.tla .tldot{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 0 10px rgba(108,99,255,0.4);}
+.tli.tld .tldot{background:var(--green);border-color:var(--green);color:white;}
+.tlcard{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:11px;}
+.tli.tla .tlcard{border-color:rgba(108,99,255,0.3);}
+.tli.tld .tlcard{opacity:0.5;}
+.tlday{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:1px;}
+.tli.tld .tlday{color:var(--green);}
+.tltitle{font-weight:700;font-size:12px;color:var(--text);margin-bottom:4px;}
+.tltasks{list-style:none;}
+.tltasks li{font-size:11px;color:var(--text3);padding:1px 0 1px 10px;position:relative;line-height:1.3;}
+.tltasks li::before{content:'›';position:absolute;left:0;color:var(--accent);}
+.tlbtn{margin-top:5px;font-size:10px;font-weight:600;color:var(--accent2);cursor:pointer;background:none;border:none;font-family:'Space Grotesk',sans-serif;padding:0;text-decoration:underline;}
+
+/* ── PROGRESS ── */
+.prog{margin-bottom:14px;}
+.prog-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;}
+.prog-track{height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--blue));transition:width 0.4s ease;}
+
+/* ── MODALS ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:flex-end;}
+.modal.open{display:flex;}
+.msheet{background:var(--s1);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:18px;width:100%;max-height:92vh;overflow-y:auto;}
+.mhandle{width:32px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.mtitle{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:16px;}
+.mactions{display:flex;gap:8px;margin-top:16px;}
+.btn{flex:1;padding:12px;border-radius:10px;border:none;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;}
+.btn-p{background:linear-gradient(135deg,var(--accent),#8b85ff);color:white;box-shadow:0 4px 15px rgba(108,99,255,0.3);}
+.btn-p:active{transform:scale(0.97);}
+.btn-g{background:var(--s2);color:var(--text2);border:1px solid var(--border);}
+.btn-d{background:rgba(255,71,87,0.1);color:var(--red);border:1px solid rgba(255,71,87,0.2);}
+.btn-ai{background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(78,205,196,0.15));color:var(--accent2);border:1px solid rgba(108,99,255,0.3);width:100%;margin-top:8px;padding:12px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;}
+.btn-ai:active{transform:scale(0.97);}
+.type-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.tchip{padding:5px 10px;border-radius:14px;border:1.5px solid var(--border);font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.2s;}
+.tchip.sel{border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,0.1);}
+.filter-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;}
+.filter-row::-webkit-scrollbar{display:none;}
+.fchip{flex-shrink:0;padding:5px 10px;border-radius:14px;border:1.5px solid var(--border);font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;}
+.fchip.active{border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,0.1);}
+.settings-step{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;}
+.sstep-num{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--accent2);margin-bottom:3px;}
+.sstep-text{font-size:12px;color:var(--text);line-height:1.5;}
+.scode{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#ff9a6c;margin-top:5px;word-break:break-all;line-height:1.5;max-height:90px;overflow-y:auto;}
+.sync-banner{background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);border-radius:10px;padding:9px 12px;font-size:12px;color:var(--green);margin-bottom:10px;display:none;}
+.sync-banner.show{display:block;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:16px;font-size:12px;font-weight:500;opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-brand">
+    <div class="brand-gem">V</div>
+    <div class="brand-text">
+      <div class="brand-name">Varney Digital</div>
+      <div class="brand-sub">Intelligence CRM</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-icon" id="alert-btn" onclick="switchTab('alerts')" title="Follow-up alerts">🔔<div class="sync-dot" id="alert-dot" style="background:var(--text3)"></div></div>
+    <div class="nav-icon" onclick="manualSync()" title="Sync">☁️<div class="sync-dot" id="syncDot"></div></div>
+    <div class="nav-icon" onclick="openSettings()">⚙️</div>
+    <button class="add-btn" onclick="openAddModal()">+ Add</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" data-v="dashboard" onclick="switchTab('dashboard')">Dashboard</div>
+  <div class="tab" data-v="pipeline" onclick="switchTab('pipeline')">Pipeline <span class="badge" id="b-pipe">0</span></div>
+  <div class="tab" data-v="clients" onclick="switchTab('clients')">Clients <span class="badge" id="b-clients">0</span></div>
+  <div class="tab" data-v="ai" onclick="switchTab('ai')">🤖 AI Tools</div>
+  <div class="tab" data-v="alerts" onclick="switchTab('alerts')">Alerts <span class="badge red" id="b-alerts">0</span></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="s-pipe">0</div><div class="stat-label">In Pipeline</div></div>
+    <div class="stat g"><div class="stat-val" id="s-active">0</div><div class="stat-label">Active Clients</div></div>
+    <div class="stat o"><div class="stat-val" id="s-rev">$0</div><div class="stat-label">Monthly Revenue</div></div>
+    <div class="stat y"><div class="stat-val" id="s-spend">$0</div><div class="stat-label">Ad Spend Managed</div></div>
+  </div>
+  <div class="stitle">Pipeline</div>
+  <div class="pipe" id="pipe1"></div>
+  <div class="stitle">Recent Activity</div>
+  <div class="cards" id="dash-recent"></div>
+</div>
+
+<!-- PIPELINE -->
+<div class="view" id="view-pipeline">
+  <div class="pipe" id="pipe2"></div>
+  <div class="filter-row" id="filter-row"></div>
+  <div class="cards" id="pipe-list"></div>
+</div>
+
+<!-- CLIENTS -->
+<div class="view" id="view-clients">
+  <div class="cards" id="client-list"></div>
+</div>
+
+<!-- AI TOOLS -->
+<div class="view" id="view-ai">
+  <div class="ai-panel">
+    <div class="ai-panel-title">⚡ AI COMMAND CENTER</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Select a client or prospect to run AI tools, or use standalone tools below.</div>
+    <div class="fs">
+      <label class="fl">Select Client / Prospect</label>
+      <select class="fse" id="ai-client-select" onchange="updateAIPanel()">
+        <option value="">— No client selected —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stitle">Standalone AI Tools</div>
+  <div class="ai-tools-grid">
+    <div class="ai-tool" onclick="openAITool('research')">
+      <div class="ai-tool-icon">🔍</div>
+      <div class="ai-tool-name">Prospect Researcher</div>
+      <div class="ai-tool-desc">Paste a website URL — AI builds the full prospect profile</div>
+    </div>
+    <div class="ai-tool" onclick="openAITool('adcopy')">
+      <div class="ai-tool-icon">✍️</div>
+      <div class="ai-tool-name">Ad Copy Generator</div>
+      <div class="ai-tool-desc">Generate 5 ready-to-use ad variations for any client</div>
+    </div>
+    <div class="ai-tool" onclick="openAITool('outreach')">
+      <div class="ai-tool-icon">📩</div>
+      <div class="ai-tool-name">Outreach Writer</div>
+      <div class="ai-tool-desc">Personalized cold email or DM for any prospect</div>
+    </div>
+    <div class="ai-tool" onclick="openAITool('proposal')">
+      <div class="ai-tool-icon">📋</div>
+      <div class="ai-tool-name">Proposal Writer</div>
+      <div class="ai-tool-desc">Full proposal from discovery answers, ready to send</div>
+    </div>
+    <div class="ai-tool" onclick="openAITool('diagnose')">
+      <div class="ai-tool-icon">📊</div>
+      <div class="ai-tool-name">Campaign Doctor</div>
+      <div class="ai-tool-desc">Paste your Meta metrics — get specific fixes</div>
+    </div>
+    <div class="ai-tool" onclick="openAITool('strategy')">
+      <div class="ai-tool-icon">🎯</div>
+      <div class="ai-tool-name">Strategy Builder</div>
+      <div class="ai-tool-desc">Full campaign strategy from discovery data</div>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="view" id="view-alerts">
+  <div class="stitle">Follow-Up Alerts</div>
+  <div id="alerts-list"></div>
+</div>
+
+<!-- DETAIL VIEW -->
+<div class="view" id="view-detail">
+  <div class="dheader">
+    <div class="back" onclick="goBack()">←</div>
+    <div style="flex:1;"><div class="dname" id="d-name"></div><div class="dsub" id="d-sub"></div></div>
+    <div style="text-align:right;">
+      <div id="d-health-score" style="font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;"></div>
+      <div style="font-size:8px;color:var(--text3);letter-spacing:1px;">HEALTH</div>
+    </div>
+  </div>
+
+  <div class="stitle">Stage</div>
+  <div class="stage-sel" id="stage-sel"></div>
+
+  <div id="client-tools" style="display:none;">
+    <div class="stitle">Tools</div>
+    <div class="tgrid">
+      <div class="tbtn" onclick="openTool('discovery')"><div class="ticon">🔍</div><div class="tname">Discovery</div><div class="tdesc">Intake call notes</div></div>
+      <div class="tbtn" onclick="openTool('onboarding')"><div class="ticon">📋</div><div class="tname">Onboarding</div><div class="tdesc">Checklist & timeline</div></div>
+      <div class="tbtn" onclick="openTool('kpi')"><div class="ticon">📈</div><div class="tname">KPI Tracker</div><div class="tdesc">CPL, ROAS, leads</div></div>
+      <div class="tbtn coming"><div class="ticon">📊</div><div class="tname">Reporting</div><div class="tdesc">Weekly reports</div><div class="ctag">Coming Soon</div></div>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="stitle">Profile</div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Phone</label><input class="fi" id="d-phone" placeholder="(734) 000-0000" oninput="sf('phone',this.value)"/></div>
+    <div><label class="fl">Email</label><input class="fi" id="d-email" placeholder="email@..." oninput="sf('email',this.value)"/></div>
+  </div></div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Website</label><input class="fi" id="d-website" placeholder="https://..." oninput="sf('website',this.value)"/></div>
+    <div><label class="fl">Facebook</label><input class="fi" id="d-fb" placeholder="fb.com/..." oninput="sf('facebook',this.value)"/></div>
+  </div></div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Monthly Fee</label><input class="fi" id="d-fee" placeholder="$0/mo" oninput="sf('fee',this.value)"/></div>
+    <div><label class="fl">Ad Spend</label><input class="fi" id="d-spend" placeholder="$500/mo" oninput="sf('adSpend',this.value)"/></div>
+  </div></div>
+
+  <div class="divider"></div>
+  <div class="stitle">Research Intel</div>
+  <div class="rblock">
+    <div class="rblock-title">What We Know</div>
+    <textarea class="fta" id="d-intel" rows="4" placeholder="Research notes — website details, ad library findings, business history, social presence, competitors, what makes them a strong prospect..." oninput="sf('intel',this.value)"></textarea>
+  </div>
+  <div class="fs"><label class="fl">Average Job Value</label><input class="fi" id="d-jv" placeholder="e.g. $8,000–$15,000" oninput="sf('jobValue',this.value)"/></div>
+  <div class="fs"><label class="fl">Key Selling Angle</label><textarea class="fta" id="d-angle" rows="2" placeholder="The specific hook for this prospect..." oninput="sf('angle',this.value)"></textarea></div>
+
+  <button class="btn-ai" onclick="runAIForDetail('research')">🤖 AI — Research This Prospect</button>
+  <button class="btn-ai" style="margin-top:6px;" onclick="runAIForDetail('outreach')">📩 AI — Write Outreach Message</button>
+  <button class="btn-ai" style="margin-top:6px;" onclick="runAIForDetail('adcopy')">✍️ AI — Generate Ad Copy</button>
+  <div id="detail-ai-output"></div>
+
+  <div class="divider"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <div class="stitle" style="margin-bottom:0;">Outreach Log</div>
+    <button class="btn btn-g" style="flex:none;padding:5px 10px;font-size:11px;" onclick="openOutreachModal()">+ Log</button>
+  </div>
+  <div id="outreach-log"></div>
+
+  <div class="divider"></div>
+
+  <!-- STRATEGY BRIEF -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <div class="stitle" style="margin-bottom:0;">Strategy Brief</div>
+    <button class="btn btn-g" style="flex:none;padding:5px 10px;font-size:11px;" onclick="copyStrategy()">📋 Copy</button>
+  </div>
+  <div class="rblock" style="margin-bottom:8px;">
+    <div class="rblock-title">Core Argument / Pitch</div>
+    <textarea class="fta" id="d-pitch" rows="3" placeholder="The one idea that frames your entire pitch for this client..." oninput="sf('pitch',this.value)"></textarea>
+  </div>
+  <div class="rblock" style="margin-bottom:8px;">
+    <div class="rblock-title">Full Strategy Brief</div>
+    <textarea class="fta" id="d-strategy" rows="10" placeholder="Paste the full strategy brief here — campaign structure, audiences, ad angles, budget, creative direction, anything Claude generated or you wrote yourself..." oninput="sf('strategy',this.value)"></textarea>
+  </div>
+  <div class="rblock" style="margin-bottom:8px;">
+    <div class="rblock-title">Call Prep — Questions to Ask</div>
+    <textarea class="fta" id="d-callprep" rows="5" placeholder="Key questions to ask on the discovery or strategy call..." oninput="sf('callprep',this.value)"></textarea>
+  </div>
+  <div class="rblock" style="margin-bottom:8px;">
+    <div class="rblock-title">Objection Handlers</div>
+    <textarea class="fta" id="d-objections" rows="4" placeholder="Common objections and your responses — quick reference during calls..." oninput="sf('objections',this.value)"></textarea>
+  </div>
+  <div class="rblock" style="margin-bottom:8px;">
+    <div class="rblock-title">The Ask — How to Close This Call</div>
+    <textarea class="fta" id="d-theask" rows="3" placeholder="What are you closing for at the end of this call? What's the exact next step?" oninput="sf('theask',this.value)"></textarea>
+  </div>
+  <button class="btn-ai" onclick="runAIForDetail('strategy')">🎯 AI — Generate Full Strategy Brief</button>
+  <div id="strategy-ai-output"></div>
+
+  <div class="divider"></div>
+  <div class="stitle">Notes</div>
+  <textarea class="fta" id="d-notes" rows="3" placeholder="Call recap, next steps, anything else..." oninput="sf('notes',this.value)"></textarea>
+
+  <div class="divider"></div>
+  <button class="btn btn-d" style="width:100%;padding:12px;" onclick="deleteRec()">Delete Record</button>
+</div>
+
+<!-- DISCOVERY -->
+<div class="view" id="view-discovery">
+  <div class="dheader">
+    <div class="back" onclick="openTool(null)">←</div>
+    <div><div class="dname">Discovery</div><div class="dsub" id="disc-sub"></div></div>
+  </div>
+  <div class="prog"><div class="prog-meta"><span id="dp-l">0 of 10</span><span id="dp-p">0%</span></div><div class="prog-track"><div class="prog-fill" id="dp-f" style="width:0%"></div></div></div>
+  <div id="disc-qs"></div>
+  <button class="btn-ai" style="margin-top:8px;" onclick="runAIForDetail('strategy')">🎯 AI — Build Campaign Strategy From These Answers</button>
+  <div id="disc-ai-output"></div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="view" id="view-onboarding">
+  <div class="dheader">
+    <div class="back" onclick="openTool(null)">←</div>
+    <div><div class="dname">Onboarding</div><div class="dsub" id="ob-sub"></div></div>
+  </div>
+  <div class="prog"><div class="prog-meta"><span id="op-l">0 of 10</span><span id="op-p">0%</span></div><div class="prog-track"><div class="prog-fill" id="op-f" style="width:0%"></div></div></div>
+  <div id="ob-list"></div>
+  <div class="divider"></div>
+  <div class="stitle">Launch Timeline</div>
+  <div class="tl-wrap" id="ob-tl"></div>
+</div>
+
+<!-- KPI TRACKER -->
+<div class="view" id="view-kpi">
+  <div class="dheader">
+    <div class="back" onclick="openTool(null)">←</div>
+    <div><div class="dname">KPI Tracker</div><div class="dsub" id="kpi-sub"></div></div>
+  </div>
+  <div class="stitle">Enter This Week's Numbers</div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Ad Spend ($)</label><input class="fi" id="kpi-spend" type="number" placeholder="0" oninput="calcKPI()"/></div>
+    <div><label class="fl">Leads Generated</label><input class="fi" id="kpi-leads" type="number" placeholder="0" oninput="calcKPI()"/></div>
+  </div></div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Clicks</label><input class="fi" id="kpi-clicks" type="number" placeholder="0" oninput="calcKPI()"/></div>
+    <div><label class="fl">Impressions</label><input class="fi" id="kpi-impr" type="number" placeholder="0" oninput="calcKPI()"/></div>
+  </div></div>
+  <div class="fs"><div class="frow">
+    <div><label class="fl">Jobs Closed</label><input class="fi" id="kpi-closed" type="number" placeholder="0" oninput="calcKPI()"/></div>
+    <div><label class="fl">Revenue Generated ($)</label><input class="fi" id="kpi-rev" type="number" placeholder="0" oninput="calcKPI()"/></div>
+  </div></div>
+  <div class="stitle">Performance</div>
+  <div class="kpi-grid" id="kpi-results"></div>
+  <button class="btn-ai" onclick="runKPIDiagnosis()">📊 AI — Diagnose My Campaign Performance</button>
+  <div id="kpi-ai-output"></div>
+</div>
+
+<!-- AI TOOL MODAL -->
+<div class="modal" id="aiModal">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="ai-modal-title">AI Tool</div>
+    <div id="ai-modal-body"></div>
+    <div class="mactions">
+      <button class="btn btn-g" onclick="closeAIModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal" id="addModal">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mtitle">Add to Pipeline</div>
+    <div class="fs"><label class="fl">Business Name *</label><input class="fi" id="nb" placeholder="e.g. Monroe Roofing Co."/></div>
+    <div class="fs"><div class="frow">
+      <div><label class="fl">Owner</label><input class="fi" id="no" placeholder="John Smith"/></div>
+      <div><label class="fl">Industry</label><input class="fi" id="ni" placeholder="Roofing"/></div>
+    </div></div>
+    <div class="fs"><div class="frow">
+      <div><label class="fl">Phone</label><input class="fi" id="np" placeholder="(734) 000-0000"/></div>
+      <div><label class="fl">Email</label><input class="fi" id="ne" placeholder="email@..."/></div>
+    </div></div>
+    <div class="fs"><label class="fl">Stage</label>
+      <select class="fse" id="ns">
+        <option value="prospect">Prospect</option>
+        <option value="researched">Researched</option>
+        <option value="outreach">Outreach Sent</option>
+        <option value="call">Call Booked</option>
+        <option value="proposal">Proposal Sent</option>
+        <option value="active">Active Client</option>
+      </select>
+    </div>
+    <div class="mactions">
+      <button class="btn btn-g" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-p" onclick="createRec()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- OUTREACH MODAL -->
+<div class="modal" id="outModal">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mtitle">Log Outreach</div>
+    <div class="fs"><label class="fl">Type</label>
+      <div class="type-chips">
+        <div class="tchip sel" data-t="Email" onclick="selType(this)">Email</div>
+        <div class="tchip" data-t="DM" onclick="selType(this)">DM</div>
+        <div class="tchip" data-t="Phone Call" onclick="selType(this)">Phone Call</div>
+        <div class="tchip" data-t="Text" onclick="selType(this)">Text</div>
+        <div class="tchip" data-t="Follow Up" onclick="selType(this)">Follow Up</div>
+      </div>
+    </div>
+    <div class="fs"><label class="fl">Message / Notes</label><textarea class="fta" id="ot-body" rows="5" placeholder="Paste the message you sent, or summarize the call..."></textarea></div>
+    <div class="fs"><label class="fl">Result / Response</label><input class="fi" id="ot-result" placeholder="e.g. No response / Interested / Not interested"/></div>
+    <div class="mactions">
+      <button class="btn btn-g" onclick="closeOutModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveOutreach()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settingsModal">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mtitle">Settings</div>
+    <div class="sync-banner" id="syncBanner">✓ Connected to Google Sheets</div>
+
+    <div class="stitle">AI Configuration</div>
+    <div class="fs"><label class="fl">Anthropic API Key</label><input class="fi" id="api-key-input" type="password" placeholder="sk-ant-..."/></div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Your API key is stored only on your device. Get one free at console.anthropic.com — new accounts get free credits.</div>
+    <button class="btn btn-p" style="width:100%;margin-bottom:16px;" onclick="saveAPIKey()">Save API Key</button>
+
+    <div class="stitle">Google Sheets Backup</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5;">Requires desktop browser for initial setup. One time only.</div>
+    <div class="settings-step"><div class="sstep-num">Step 1</div><div class="sstep-text">Go to <strong>sheets.google.com</strong> on desktop. Create a blank spreadsheet named <em>Varney CRM Backup</em>.</div></div>
+    <div class="settings-step"><div class="sstep-num">Step 2</div><div class="sstep-text">Click <strong>Extensions → Apps Script</strong>. Delete existing code, paste the script below, click Save.</div>
+      <div class="scode" id="theScript">function doPost(e){try{var s=SpreadsheetApp.getActiveSpreadsheet(),data=JSON.parse(e.postData.contents),cl=data.clients||[];var cs=s.getSheetByName("Clients")||s.insertSheet("Clients");cs.clearContents();cs.appendRow(["ID","Business","Owner","Industry","Stage","Phone","Email","Website","Facebook","Fee","AdSpend","JobValue","Intel","Angle","Notes","Created"]);cl.forEach(function(c){cs.appendRow([c.id,c.bizName,c.owner,c.industry,c.stage,c.phone,c.email,c.website,c.facebook,c.fee,c.adSpend,c.jobValue,c.intel,c.angle,c.notes,new Date(c.createdAt)]);});var ds=s.getSheetByName("Discovery")||s.insertSheet("Discovery");ds.clearContents();ds.appendRow(["Business","Owner","Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10"]);cl.forEach(function(c){var d=c.discovery||[];ds.appendRow([c.bizName,c.owner,d[0],d[1],d[2],d[3],d[4],d[5],d[6],d[7],d[8],d[9]]);});var ors=s.getSheetByName("Outreach")||s.insertSheet("Outreach");ors.clearContents();ors.appendRow(["Business","Type","Message","Result","Date"]);cl.forEach(function(c){(c.outreach||[]).forEach(function(o){ors.appendRow([c.bizName,o.type,o.body,o.result,new Date(o.date)]);});});return ContentService.createTextOutput(JSON.stringify({status:"ok"})).setMimeType(ContentService.MimeType.JSON);}catch(err){return ContentService.createTextOutput(JSON.stringify({status:"error",msg:err.toString()})).setMimeType(ContentService.MimeType.JSON);}}</div>
+      <button class="btn btn-g" style="margin-top:7px;width:100%;padding:9px;flex:none;" onclick="copyScript()">📋 Copy Script</button>
+    </div>
+    <div class="settings-step"><div class="sstep-num">Step 3</div><div class="sstep-text">Click <strong>Deploy → New deployment</strong>. Type: Web app. Execute as: Me. Access: Anyone. Deploy, authorize, copy the Web App URL.</div></div>
+    <div class="settings-step"><div class="sstep-num">Step 4</div><div class="sstep-text">Paste Web App URL below and tap Save & Test.</div><input class="fi" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." style="margin-top:7px;"/></div>
+    <div style="margin-top:10px;"><button class="btn btn-d" style="width:100%;flex:none;padding:11px;" onclick="disconnectSheets()">Disconnect Sheets</button></div>
+    <div class="mactions">
+      <button class="btn btn-g" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-p" onclick="saveScriptUrl()">Save & Test</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ═══════════════════════════════════════════════════
+const STORE='varney_crm_v3', SKEY='varney_script_url', AKEY='varney_api_key';
+const API_URL='https://api.anthropic.com/v1/messages';
+const STALE_DAYS=7;
+
+const STAGES=[
+  {id:'prospect',label:'Prospect',pill:'pill-prospect',av:0},
+  {id:'researched',label:'Researched',pill:'pill-researched',av:1},
+  {id:'outreach',label:'Outreach Sent',pill:'pill-outreach',av:2},
+  {id:'call',label:'Call Booked',pill:'pill-call',av:3},
+  {id:'proposal',label:'Proposal Sent',pill:'pill-proposal',av:4},
+  {id:'active',label:'Active Client',pill:'pill-active',av:5},
+  {id:'inactive',label:'Inactive',pill:'pill-inactive',av:6}
+];
+const PIPE_STAGES=['prospect','researched','outreach','call','proposal'];
+const CLIENT_STAGES=['active','inactive'];
+
+const DQ=[
+  {q:"What exactly do they do?",hint:"Roofing, remodeling, HVAC, contracting?",ph:"e.g. Residential roofing and siding"},
+  {q:"What is their most profitable service?",hint:"Not volume — highest margin per job",ph:"e.g. Full roof replacements ~$12k"},
+  {q:"What does their average job pay them?",hint:"Real number — tells you lead value",ph:"e.g. $8,000–$15,000 per job"},
+  {q:"How many new jobs per month do they want?",hint:"Specific number, not 'more'",ph:"e.g. 6–8 new jobs per month"},
+  {q:"What cities or zip codes do they work in?",hint:"Becomes your ad targeting radius",ph:"e.g. Monroe, Temperance, Erie"},
+  {q:"Who is their best customer?",hint:"Age, homeowner type, problem they have",ph:"e.g. Homeowners 40–65, older roofs"},
+  {q:"Do they have Facebook and Instagram?",hint:"Note what needs setup",ph:"e.g. Has Facebook, no Instagram"},
+  {q:"Do they have a website?",hint:"Get URL for Pixel install",ph:"e.g. Yes — monroeroofing.com"},
+  {q:"What have they tried for marketing before?",hint:"Bad experiences = your opening",ph:"e.g. Tried Google ads, wasted $2k"},
+  {q:"What is their monthly ad spend budget?",hint:"Minimum $500/mo. Below that, walk away.",ph:"e.g. $500–$1,000 to start"}
+];
+
+const CI=[
+  {t:"Add me as Admin on Facebook Business Page",n:"Settings → Page Roles → Add by email",tag:"req"},
+  {t:"Access to Meta Business Manager",n:"I'll create one if needed",tag:"req"},
+  {t:"Confirm Facebook Business Page is active",n:"Must be a Business Page not personal",tag:"req"},
+  {t:"5–10 photos of completed work",n:"Real jobsite photos — before/afters, finished projects",tag:"asap"},
+  {t:"Website URL for Pixel installation",n:"If no website we'll use Meta's native lead form",tag:"req"},
+  {t:"Logo in PNG format",n:"For ad creative and branding",tag:"opt"},
+  {t:"Any current promotions or seasonal offers",n:"e.g. Free estimate, spring discount",tag:"opt"},
+  {t:"Confirm service area — cities and zip codes",n:"Becomes your ad targeting radius",tag:"req"},
+  {t:"Preferred lead contact method",n:"Phone, text, or email? Response time?",tag:"asap"},
+  {t:"Billing method added to Meta Ads account",n:"Card goes directly to Meta",tag:"req"}
+];
+
+const TL=[
+  {day:"Today",title:"Send Onboarding Checklist",tasks:["Text or email checklist","Confirm ad budget and billing"]},
+  {day:"Day 2–3",title:"Collect Assets & Access",tasks:["Receive photos","Get page admin access","Set up Meta Business Manager"]},
+  {day:"Day 3–4",title:"Build Campaign",tasks:["Install Pixel","Create lead form","Build cold + retargeting","Upload ad copy (3 variations)"]},
+  {day:"Day 5",title:"Launch 🚀",tasks:["Final review","Submit for approval","Notify client"]},
+  {day:"Day 7",title:"First Optimization Check",tasks:["Review CPM and CTR","Kill CTR below 0.8%","Text client update"]},
+  {day:"Day 14",title:"Mid-Month Check-In",tasks:["Send mini-report","Adjust audiences if CPL too high"]},
+  {day:"Day 30",title:"Full 30-Day Review",tasks:["Full performance report","Present retainer proposal"]}
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let db={clients:[]};
+let scriptUrl=localStorage.getItem(SKEY)||'';
+let apiKey=localStorage.getItem(AKEY)||'';
+let cid=null, cv='dashboard', pv='pipeline', af='all', ot='Email';
+let syncTimer=null, toastTimer=null;
+
+// ═══════════════════════════════════════════════════
+// DB
+// ═══════════════════════════════════════════════════
+function loadDB(){try{const r=localStorage.getItem(STORE);if(r)db=JSON.parse(r);}catch(e){db={clients:[]};}}
+function saveDB(){try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}schedSync();}
+function getRec(id){return db.clients.find(c=>c.id===id);}
+function genId(){return 'r_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
+function si(id){return STAGES.find(s=>s.id===id)||STAGES[0];}
+function avatarClass(c){return 'av'+((db.clients.indexOf(c)||0)%7);}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function switchTab(v){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  cv=v;
+  if(v==='dashboard')renderDash();
+  if(v==='pipeline')renderPipeline();
+  if(v==='clients')renderClients();
+  if(v==='alerts')renderAlerts();
+  if(v==='ai')updateAIPanel();
+}
+
+function goBack(){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+pv).classList.add('active');
+  renderDash();renderPipeline();renderClients();updateBadges();
+}
+
+// ═══════════════════════════════════════════════════
+// HEALTH SCORE
+// ═══════════════════════════════════════════════════
+function calcHealth(c){
+  if(!CLIENT_STAGES.includes(c.stage)) return null;
+  let score=0,max=100;
+  const ob=(c.onboarding||[]).filter(Boolean).length;
+  const disc=(c.discovery||[]).filter(d=>d&&d.trim()).length;
+  const oc=(c.outreach||[]).length;
+  const daysSince=c.updatedAt?(Date.now()-c.updatedAt)/(1000*60*60*24):999;
+  score+=ob*3; // 30 pts
+  score+=disc*3; // 30 pts
+  if(c.fee)score+=10;
+  if(c.adSpend)score+=10;
+  if(oc>0)score+=10;
+  if(daysSince<7)score+=10;
+  return Math.min(100,score);
+}
+
+function healthColor(score){
+  if(score>=70)return 'var(--green)';
+  if(score>=40)return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════
+// STALE DETECTION
+// ═══════════════════════════════════════════════════
+function isStale(c){
+  if(!PIPE_STAGES.includes(c.stage))return false;
+  const days=(Date.now()-(c.updatedAt||c.createdAt))/(1000*60*60*24);
+  return days>STALE_DAYS;
+}
+
+function getAlerts(){
+  return db.clients.filter(c=>isStale(c));
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function pipeHTML(){
+  return PIPE_STAGES.map((sid,i)=>{
+    const cnt=db.clients.filter(c=>c.stage===sid).length,s=si(sid);
+    const arrow=i<PIPE_STAGES.length-1?'<div class="pipe-arrow">›</div>':'';
+    return `<div class="pipe-node" onclick="filterTo('${sid}')"><div class="pipe-num">${cnt}</div><div class="pipe-lbl">${s.label}</div></div>${arrow}`;
+  }).join('');
+}
+
+function cardHTML(c){
+  const s=si(c.stage),init=(c.bizName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().substr(0,2);
+  const av='av'+((db.clients.indexOf(c)||0)%7);
+  const oc=(c.outreach||[]).length,dc=(c.discovery||[]).filter(d=>d&&d.trim()).length;
+  const staleClass=isStale(c)?' stale':'';
+  const staleFlag=isStale(c)?'<div class="stale-flag">Follow Up!</div>':'';
+  return `<div class="card${staleClass}" onclick="openRec('${c.id}')">
+    ${staleFlag}
+    <div class="card-top">
+      <div class="avatar ${av}">${init}</div>
+      <div class="card-info"><div class="card-name">${c.bizName||'Unnamed'}</div><div class="card-meta">${c.owner||'No owner'} · ${c.industry||'No industry'}</div></div>
+      <span class="pill ${s.pill}">${s.label}</span>
+    </div>
+    <div class="card-bottom">
+      <div class="ms"><div class="ms-val">${c.phone||'—'}</div><div class="ms-lbl">Phone</div></div>
+      <div class="ms"><div class="ms-val">${c.jobValue||'—'}</div><div class="ms-lbl">Job Value</div></div>
+      <div class="ms"><div class="ms-val">${oc}</div><div class="ms-lbl">Outreach</div></div>
+      <div class="ms"><div class="ms-val">${dc}/10</div><div class="ms-lbl">Discovery</div></div>
+    </div>
+  </div>`;
+}
+
+function emptyHTML(icon,title,sub){return `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;}
+
+function renderDash(){
+  const all=db.clients,active=all.filter(c=>c.stage==='active'),prospects=all.filter(c=>PIPE_STAGES.includes(c.stage));
+  const rev=active.reduce((s,c)=>s+(parseFloat((c.fee||'').replace(/[^0-9.]/g,''))||0),0);
+  const sp=active.reduce((s,c)=>s+(parseFloat((c.adSpend||'').replace(/[^0-9.]/g,''))||0),0);
+  document.getElementById('s-pipe').textContent=prospects.length;
+  document.getElementById('s-active').textContent=active.length;
+  document.getElementById('s-rev').textContent='$'+(rev>=1000?(rev/1000).toFixed(1)+'k':rev);
+  document.getElementById('s-spend').textContent='$'+(sp>=1000?(sp/1000).toFixed(1)+'k':sp);
+  document.getElementById('pipe1').innerHTML=pipeHTML();
+  const sorted=[...all].sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt)).slice(0,6);
+  document.getElementById('dash-recent').innerHTML=sorted.length?sorted.map(c=>cardHTML(c)).join(''):emptyHTML('📭','No records yet','Tap "+ Add" to add your first prospect');
+}
+
+function renderPipeline(){
+  document.getElementById('pipe2').innerHTML=pipeHTML();
+  const bar=document.getElementById('filter-row');
+  bar.innerHTML=['all',...PIPE_STAGES].map(sid=>{
+    const label=sid==='all'?'All':si(sid).label;
+    const cnt=sid==='all'?db.clients.filter(c=>PIPE_STAGES.includes(c.stage)).length:db.clients.filter(c=>c.stage===sid).length;
+    return `<div class="fchip${af===sid?' active':''}" onclick="setFilter('${sid}')">${label} (${cnt})</div>`;
+  }).join('');
+  const filtered=af==='all'?db.clients.filter(c=>PIPE_STAGES.includes(c.stage)):db.clients.filter(c=>c.stage===af);
+  document.getElementById('pipe-list').innerHTML=filtered.length?filtered.map(c=>cardHTML(c)).join(''):emptyHTML('🎯','No prospects here','Add a prospect or change the filter');
+}
+
+function renderClients(){
+  const clients=db.clients.filter(c=>CLIENT_STAGES.includes(c.stage));
+  document.getElementById('client-list').innerHTML=clients.length?clients.map(c=>cardHTML(c)).join(''):emptyHTML('🏆','No active clients yet','Move a prospect to Active Client when they sign');
+}
+
+function renderAlerts(){
+  const stale=getAlerts();
+  const el=document.getElementById('alerts-list');
+  if(!stale.length){el.innerHTML=emptyHTML('✅','All clear','No follow-ups overdue. Keep momentum going.');return;}
+  el.innerHTML=stale.map(c=>{
+    const days=Math.floor((Date.now()-(c.updatedAt||c.createdAt))/(1000*60*60*24));
+    return `<div class="alert-card" onclick="openRec('${c.id}')">
+      <div class="alert-title">${c.bizName||'Unnamed'} — ${c.owner||'No owner'}</div>
+      <div class="alert-sub">⚠️ No activity in ${days} days — follow up now</div>
+    </div>`;
+  }).join('');
+}
+
+function filterTo(s){af=s;switchTab('pipeline');}
+function setFilter(s){af=s;renderPipeline();}
+
+function updateBadges(){
+  document.getElementById('b-pipe').textContent=db.clients.filter(c=>PIPE_STAGES.includes(c.stage)).length;
+  document.getElementById('b-clients').textContent=db.clients.filter(c=>c.stage==='active').length;
+  const alerts=getAlerts().length;
+  document.getElementById('b-alerts').textContent=alerts;
+  document.getElementById('alert-dot').style.background=alerts>0?'var(--red)':'var(--text3)';
+  document.getElementById('alert-btn').classList.toggle('pulse',alerts>0);
+}
+
+// ═══════════════════════════════════════════════════
+// DETAIL
+// ═══════════════════════════════════════════════════
+function openRec(id){
+  cid=id; pv=cv;
+  const c=getRec(id); if(!c) return;
+  document.getElementById('d-name').textContent=c.bizName||'Unnamed';
+  document.getElementById('d-sub').textContent=(c.owner||'No owner')+' · '+(c.industry||'No industry');
+  document.getElementById('d-phone').value=c.phone||'';
+  document.getElementById('d-email').value=c.email||'';
+  document.getElementById('d-website').value=c.website||'';
+  document.getElementById('d-fb').value=c.facebook||'';
+  document.getElementById('d-fee').value=c.fee||'';
+  document.getElementById('d-spend').value=c.adSpend||'';
+  document.getElementById('d-intel').value=c.intel||'';
+  document.getElementById('d-angle').value=c.angle||'';
+  document.getElementById('d-notes').value=c.notes||'';
+  document.getElementById('d-jv').value=c.jobValue||'';
+  document.getElementById('d-pitch').value=c.pitch||'';
+  document.getElementById('d-strategy').value=c.strategy||'';
+  document.getElementById('d-callprep').value=c.callprep||'';
+  document.getElementById('d-objections').value=c.objections||'';
+  document.getElementById('d-theask').value=c.theask||'';
+  const isClient=CLIENT_STAGES.includes(c.stage);
+  document.getElementById('client-tools').style.display=isClient?'block':'none';
+  const health=calcHealth(c);
+  const hel=document.getElementById('d-health-score');
+  if(health!==null){hel.textContent=health;hel.style.color=healthColor(health);}
+  else hel.textContent='';
+  document.getElementById('detail-ai-output').innerHTML='';
+  document.getElementById('strategy-ai-output').innerHTML='';
+  renderStageSel(c); renderOutreachLog(c);
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-detail').classList.add('active');
+}
+
+function renderStageSel(c){
+  document.getElementById('stage-sel').innerHTML=STAGES.map(s=>`<div class="sopt${c.stage===s.id?' sel':''}" onclick="changeStage('${s.id}')">${s.label}</div>`).join('');
+}
+
+function changeStage(stage){
+  const c=getRec(cid); if(!c) return;
+  c.stage=stage; c.updatedAt=Date.now(); saveDB();
+  renderStageSel(c);
+  document.getElementById('client-tools').style.display=CLIENT_STAGES.includes(stage)?'block':'none';
+  showToast('Stage → '+si(stage).label); updateBadges();
+}
+
+function sf(field,val){
+  const c=getRec(cid); if(!c) return;
+  c[field]=val; c.updatedAt=Date.now(); saveDB();
+}
+
+function copyStrategy(){
+  const c=getRec(cid); if(!c) return;
+  const parts=[];
+  if(c.pitch) parts.push('CORE ARGUMENT\n'+c.pitch);
+  if(c.strategy) parts.push('STRATEGY BRIEF\n'+c.strategy);
+  if(c.callprep) parts.push('CALL PREP — QUESTIONS\n'+c.callprep);
+  if(c.objections) parts.push('OBJECTION HANDLERS\n'+c.objections);
+  if(c.theask) parts.push('THE ASK\n'+c.theask);
+  if(!parts.length){showToast('No strategy content to copy yet');return;}
+  const text='STRATEGY BRIEF — '+(c.bizName||'Client').toUpperCase()+'\n'+'='.repeat(40)+'\n\n'+parts.join('\n\n'+'─'.repeat(30)+'\n\n');
+  navigator.clipboard.writeText(text).then(()=>showToast('Strategy copied!')).catch(()=>showToast('Copy failed'));
+}
+
+function deleteRec(){
+  if(!confirm('Delete this record?')) return;
+  db.clients=db.clients.filter(c=>c.id!==cid); saveDB(); goBack(); showToast('Deleted');
+}
+
+// ═══════════════════════════════════════════════════
+// OUTREACH LOG
+// ═══════════════════════════════════════════════════
+function renderOutreachLog(c){
+  const el=document.getElementById('outreach-log');
+  const entries=(c.outreach||[]).slice().reverse();
+  if(!entries.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 0 10px;">No outreach logged yet.</div>';return;}
+  el.innerHTML=entries.map((o,i)=>{
+    const d=new Date(o.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const bodyId='ob-body-'+i;
+    return `<div class="oe">
+      <div class="oe-top"><span class="oe-type">${o.type}</span><span class="oe-date">${d}</span></div>
+      <div class="oe-body" id="${bodyId}">${o.body||'—'}</div>
+      ${(o.body||'').length>120?`<span class="oe-expand" onclick="document.getElementById('${bodyId}').classList.toggle('expanded');this.textContent=this.textContent==='Show more'?'Show less':'Show more'">Show more</span>`:''}
+      ${o.result?`<div class="oe-result${o.result.toLowerCase().includes('no response')?' no-response':''}">↪ ${o.result}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openOutreachModal(){document.getElementById('outModal').classList.add('open');}
+function closeOutModal(){
+  document.getElementById('outModal').classList.remove('open');
+  document.getElementById('ot-body').value=''; document.getElementById('ot-result').value='';
+  document.querySelectorAll('.tchip').forEach((c,i)=>c.classList.toggle('sel',i===0)); ot='Email';
+}
+function selType(el){document.querySelectorAll('.tchip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');ot=el.dataset.t;}
+function saveOutreach(){
+  const c=getRec(cid); if(!c) return;
+  const body=document.getElementById('ot-body').value.trim();
+  if(!body){showToast('Add a message first');return;}
+  if(!c.outreach)c.outreach=[];
+  c.outreach.push({type:ot,body,result:document.getElementById('ot-result').value.trim(),date:Date.now()});
+  c.updatedAt=Date.now(); saveDB(); renderOutreachLog(c); closeOutModal(); showToast('Outreach logged');
+}
+
+// ═══════════════════════════════════════════════════
+// ADD MODAL
+// ═══════════════════════════════════════════════════
+function openAddModal(){document.getElementById('addModal').classList.add('open');}
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('open');
+  ['nb','no','ni','np','ne'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ns').value='prospect';
+}
+function createRec(){
+  const biz=document.getElementById('nb').value.trim();
+  if(!biz){alert('Business name required');return;}
+  const rec={id:genId(),bizName:biz,owner:document.getElementById('no').value.trim(),industry:document.getElementById('ni').value.trim(),phone:document.getElementById('np').value.trim(),email:document.getElementById('ne').value.trim(),stage:document.getElementById('ns').value,website:'',facebook:'',fee:'',adSpend:'',jobValue:'',intel:'',angle:'',notes:'',discovery:Array(10).fill(''),onboarding:Array(10).fill(false),tlPhase:0,outreach:[],kpi:{},createdAt:Date.now(),updatedAt:Date.now()};
+  db.clients.push(rec); saveDB(); closeAddModal(); updateBadges(); renderDash(); renderPipeline(); renderClients(); showToast('Added to pipeline');
+  updateAIPanel();
+}
+
+// ═══════════════════════════════════════════════════
+// DISCOVERY
+// ═══════════════════════════════════════════════════
+function openTool(tool){
+  if(!tool){
+    document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+    document.getElementById('view-detail').classList.add('active'); return;
+  }
+  const c=getRec(cid); if(!c) return;
+  if(tool==='discovery'){document.getElementById('disc-sub').textContent=c.bizName;buildDisc(c);document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-discovery').classList.add('active');}
+  else if(tool==='onboarding'){document.getElementById('ob-sub').textContent=c.bizName;buildOB(c);document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-onboarding').classList.add('active');}
+  else if(tool==='kpi'){document.getElementById('kpi-sub').textContent=c.bizName;loadKPI(c);document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-kpi').classList.add('active');}
+}
+
+function buildDisc(c){
+  const saved=c.discovery||Array(10).fill('');
+  const con=document.getElementById('disc-qs'); con.innerHTML='';
+  DQ.forEach((q,i)=>{
+    const b=document.createElement('div'); b.className='qblock'+(saved[i]?' filled':''); b.id='dq'+i;
+    b.innerHTML=`<div class="qnum-row"><span class="qnum">Q${String(i+1).padStart(2,'0')}</span><div class="qtitle">${q.q}</div></div><div class="qhint">${q.hint}</div><textarea class="fta" id="da${i}" placeholder="${q.ph}" oninput="saveDisc(${i},this.value)">${saved[i]||''}</textarea>`;
+    con.appendChild(b);
+  });
+  updDiscP(saved);
+  document.getElementById('disc-ai-output').innerHTML='';
+}
+function saveDisc(i,val){
+  const c=getRec(cid); if(!c) return;
+  if(!c.discovery)c.discovery=Array(10).fill('');
+  c.discovery[i]=val; c.updatedAt=Date.now(); saveDB();
+  const b=document.getElementById('dq'+i); if(b)b.classList.toggle('filled',val.trim().length>0);
+  updDiscP(c.discovery);
+}
+function updDiscP(a){
+  const f=(a||[]).filter(x=>x&&x.trim()).length,p=Math.round((f/10)*100);
+  document.getElementById('dp-f').style.width=p+'%';
+  document.getElementById('dp-l').textContent=f+' of 10';
+  document.getElementById('dp-p').textContent=p+'%';
+}
+
+// ═══════════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════════
+function buildOB(c){
+  const saved=c.onboarding||Array(10).fill(false),ph=c.tlPhase||0;
+  const cl=document.getElementById('ob-list'); cl.innerHTML='';
+  CI.forEach((item,i)=>{
+    const el=document.createElement('div'); el.className='ci'+(saved[i]?' done':''); el.id='obi'+i; el.onclick=()=>togOB(i);
+    el.innerHTML=`<div class="cicheck">${saved[i]?'✓':''}</div><div><div class="ci-title">${item.t}</div><div class="ci-note">${item.n}</div><span class="ctag2 ${item.tag==='req'?'req':item.tag==='asap'?'asap':'opt'}">${item.tag==='req'?'Required':item.tag==='asap'?'ASAP':'Optional'}</span></div>`;
+    cl.appendChild(el);
+  });
+  updOBP(saved);
+  const tl=document.getElementById('ob-tl'); tl.innerHTML='';
+  TL.forEach((item,i)=>{
+    const el=document.createElement('div'); el.className='tli'+(i===ph?' tla':i<ph?' tld':''); el.id='tli'+i;
+    const tasks=item.tasks.map(t=>`<li>${t}</li>`).join('');
+    el.innerHTML=`<div class="tldot">${i<ph?'✓':i+1}</div><div class="tlcard"><div class="tlday">${item.day}</div><div class="tltitle">${item.title}</div><ul class="tltasks">${tasks}</ul><button class="tlbtn" onclick="setPhase(${i})">${i===ph?'▶ Current':'Set as current'}</button></div>`;
+    tl.appendChild(el);
+  });
+}
+function togOB(i){
+  const c=getRec(cid); if(!c) return;
+  if(!c.onboarding)c.onboarding=Array(10).fill(false);
+  c.onboarding[i]=!c.onboarding[i]; c.updatedAt=Date.now(); saveDB();
+  const el=document.getElementById('obi'+i); el.classList.toggle('done',c.onboarding[i]); el.querySelector('.cicheck').textContent=c.onboarding[i]?'✓':'';
+  updOBP(c.onboarding);
+}
+function updOBP(saved){
+  const d=(saved||[]).filter(Boolean).length,p=Math.round((d/10)*100);
+  document.getElementById('op-f').style.width=p+'%';
+  document.getElementById('op-l').textContent=d+' of 10';
+  document.getElementById('op-p').textContent=p+'%';
+}
+function setPhase(i){
+  const c=getRec(cid); if(!c) return;
+  c.tlPhase=i; c.updatedAt=Date.now(); saveDB(); buildOB(c); showToast('Phase updated');
+}
+
+// ═══════════════════════════════════════════════════
+// KPI TRACKER
+// ═══════════════════════════════════════════════════
+function loadKPI(c){
+  const k=c.kpi||{};
+  document.getElementById('kpi-spend').value=k.spend||'';
+  document.getElementById('kpi-leads').value=k.leads||'';
+  document.getElementById('kpi-clicks').value=k.clicks||'';
+  document.getElementById('kpi-impr').value=k.impr||'';
+  document.getElementById('kpi-closed').value=k.closed||'';
+  document.getElementById('kpi-rev').value=k.rev||'';
+  calcKPI();
+  document.getElementById('kpi-ai-output').innerHTML='';
+}
+
+function calcKPI(){
+  const c=getRec(cid); if(!c) return;
+  const spend=parseFloat(document.getElementById('kpi-spend').value)||0;
+  const leads=parseFloat(document.getElementById('kpi-leads').value)||0;
+  const clicks=parseFloat(document.getElementById('kpi-clicks').value)||0;
+  const impr=parseFloat(document.getElementById('kpi-impr').value)||0;
+  const closed=parseFloat(document.getElementById('kpi-closed').value)||0;
+  const rev=parseFloat(document.getElementById('kpi-rev').value)||0;
+  if(!c.kpi)c.kpi={};
+  c.kpi={spend,leads,clicks,impr,closed,rev}; c.updatedAt=Date.now(); saveDB();
+
+  const cpl=leads>0?(spend/leads).toFixed(2):0;
+  const ctr=impr>0?((clicks/impr)*100).toFixed(2):0;
+  const cpc=clicks>0?(spend/clicks).toFixed(2):0;
+  const roas=spend>0?(rev/spend).toFixed(2):0;
+  const cvr=leads>0?((closed/leads)*100).toFixed(1):0;
+  const cpa=closed>0?(spend/closed).toFixed(2):0;
+
+  const metrics=[
+    {label:'Cost Per Lead',val:'$'+cpl,bar:Math.max(0,100-Math.min(100,(cpl/50)*100)),status:cpl>0&&cpl<30?'good':cpl>50?'bad':'warn'},
+    {label:'Click-Through Rate',val:ctr+'%',bar:Math.min(100,(ctr/3)*100),status:ctr>2?'good':ctr>1?'warn':'bad'},
+    {label:'Cost Per Click',val:'$'+cpc,bar:Math.max(0,100-Math.min(100,(cpc/5)*100)),status:cpc>0&&cpc<2?'good':cpc>4?'bad':'warn'},
+    {label:'ROAS',val:roas+'x',bar:Math.min(100,(roas/5)*100),status:roas>3?'good':roas>1.5?'warn':'bad'},
+    {label:'Close Rate',val:cvr+'%',bar:Math.min(100,(cvr/30)*100),status:cvr>20?'good':cvr>10?'warn':'bad'},
+    {label:'Cost Per Acquisition',val:'$'+cpa,bar:Math.max(0,100-Math.min(100,(cpa/500)*100)),status:cpa>0&&cpa<200?'good':cpa>500?'bad':'warn'}
+  ];
+
+  document.getElementById('kpi-results').innerHTML=metrics.map(m=>`
+    <div class="kpi-card">
+      <div class="kpi-val">${m.val}</div>
+      <div class="kpi-lbl">${m.label}</div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar bar-${m.status}" style="width:${m.bar}%"></div></div>
+      <div class="kpi-status" style="color:${m.status==='good'?'var(--green)':m.status==='warn'?'var(--yellow)':'var(--red)'}">${m.status==='good'?'✓ Good':m.status==='warn'?'⚠ Watch':'✗ Fix'}</div>
+    </div>
+  `).join('');
+}
+
+async function runKPIDiagnosis(){
+  const c=getRec(cid); if(!c) return;
+  const k=c.kpi||{};
+  const prompt=`You are an expert Meta ads campaign manager reviewing performance data for ${c.bizName||'a local contractor'} in Monroe Michigan.
+
+Campaign metrics:
+- Ad Spend: $${k.spend||0}
+- Leads: ${k.leads||0}
+- Clicks: ${k.clicks||0}
+- Impressions: ${k.impr||0}
+- Jobs Closed: ${k.closed||0}
+- Revenue Generated: $${k.rev||0}
+- Industry: ${c.industry||'contractor'}
+- Average Job Value: ${c.jobValue||'unknown'}
+
+Analyze these metrics and provide:
+1. What's working
+2. What's broken and needs immediate fixing
+3. Specific action steps to improve (be very specific — name exact changes to make in Meta Ads Manager)
+4. What these numbers mean for the client's ROI
+
+Be direct, specific, and actionable. No fluff.`;
+
+  await runAI(prompt, 'kpi-ai-output', '📊 Campaign Diagnosis');
+}
+
+// ═══════════════════════════════════════════════════
+// AI ENGINE
+// ═══════════════════════════════════════════════════
+async function callClaude(prompt){
+  if(!apiKey) throw new Error('NO_API_KEY');
+  const res=await fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'API error');}
+  const data=await res.json();
+  return data.content[0].text;
+}
+
+async function runAI(prompt, outputId, title){
+  const el=document.getElementById(outputId);
+  if(!el) return;
+  if(!apiKey){
+    el.innerHTML=`<div class="ai-response"><div class="ai-response-header"><span class="ai-badge">ACTION NEEDED</span></div><div class="ai-response-body">To use AI features, add your Anthropic API key in Settings (⚙️).\n\nGet a free key at console.anthropic.com — new accounts include free credits to get you started.</div></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>AI thinking...</span></div>`;
+  try{
+    const result=await callClaude(prompt);
+    el.innerHTML=`<div class="ai-response">
+      <div class="ai-response-header"><span class="ai-badge">AI — ${title}</span></div>
+      <div class="ai-response-body">${result}</div>
+      <button class="ai-copy-btn" onclick="copyText(\`${result.replace(/`/g,"'")}\`)">📋 Copy to clipboard</button>
+    </div>`;
+  }catch(e){
+    const msg=e.message==='NO_API_KEY'?'Add your API key in Settings to use AI features.':'AI error: '+e.message;
+    el.innerHTML=`<div class="ai-response"><div class="ai-response-body" style="color:var(--red)">${msg}</div></div>`;
+  }
+}
+
+async function runAIForDetail(type){
+  const c=getRec(cid); if(!c) return;
+  let prompt='', title='';
+
+  if(type==='research'){
+    title='Prospect Research';
+    prompt=`You are a sharp media buyer researching a prospect for cold outreach.
+
+Business: ${c.bizName||'Unknown'}
+Owner: ${c.owner||'Unknown'}
+Industry: ${c.industry||'Unknown'}
+Website: ${c.website||'None found'}
+Phone: ${c.phone||'Unknown'}
+Known Intel: ${c.intel||'None yet'}
+
+Based on what you know about this type of ${c.industry||'local service'} business in Monroe Michigan area:
+1. What are the most likely pain points for their marketing?
+2. What does their ideal customer look like?
+3. What Meta ad strategy would work best for them?
+4. What specific angle should I use in my outreach?
+5. What questions should I ask on the discovery call?
+
+Be specific and actionable.`;
+  }
+
+  else if(type==='outreach'){
+    title='Outreach Message';
+    prompt=`You are an expert cold outreach specialist writing a personalized message for a Meta ads agency.
+
+Prospect Details:
+- Business: ${c.bizName||'Unknown business'}
+- Owner: ${c.owner||'Unknown owner'}
+- Industry: ${c.industry||'contractor'}
+- Location: Monroe, Michigan area
+- Website: ${c.website||'unknown'}
+- Job Value: ${c.jobValue||'unknown'}
+- Intel: ${c.intel||'no additional intel'}
+- Key Angle: ${c.angle||'not specified'}
+
+Write 2 versions:
+1. A cold EMAIL (with subject line) — professional, specific, leads with their problem
+2. A Facebook/Instagram DM — shorter, conversational, same strategy
+
+Rules: Never lead with "I do Facebook ads." Lead with their problem or opportunity. Be specific using the intel above. Include Varney Digital Media as the agency name. End with a specific call to action.`;
+  }
+
+  else if(type==='adcopy'){
+    title='Ad Copy Variations';
+    const disc=c.discovery||[];
+    prompt=`You are an expert Meta ads copywriter creating ad copy for a local contractor.
+
+Client: ${c.bizName||'Unknown'}
+Industry: ${c.industry||'home services'}
+Location: Monroe Michigan and surrounding area
+Most Profitable Service: ${disc[1]||'unknown'}
+Average Job Value: ${c.jobValue||disc[2]||'unknown'}
+Target Customer: ${disc[5]||'homeowners'}
+Current Offer: ${disc[9]||'free estimate'}
+Selling Angle: ${c.angle||'quality local service'}
+
+Write 5 Facebook/Instagram ad variations:
+- Ad 1: Season/timing hook
+- Ad 2: Problem/solution angle
+- Ad 3: Social proof/trust angle
+- Ad 4: Direct offer
+- Ad 5: Urgency/scarcity
+
+For each ad include: Headline (under 40 chars), Primary text (under 125 chars), and a Call-to-action button suggestion. Make them punchy, scroll-stopping, and locally relevant.`;
+  }
+
+  else if(type==='strategy'){
+    title='Campaign Strategy';
+    const disc=c.discovery||[];
+    prompt=`You are a senior Meta ads strategist building a complete campaign plan.
+
+Client: ${c.bizName}
+Owner: ${c.owner}
+Industry: ${c.industry}
+Discovery Answers:
+Q1 Services: ${disc[0]||'unknown'}
+Q2 Most Profitable: ${disc[1]||'unknown'}
+Q3 Avg Job Value: ${disc[2]||'unknown'}
+Q4 Jobs Wanted/Month: ${disc[3]||'unknown'}
+Q5 Service Area: ${disc[4]||'Monroe MI'}
+Q6 Best Customer: ${disc[5]||'homeowners'}
+Q7 Social Media: ${disc[6]||'unknown'}
+Q8 Website: ${disc[7]||'unknown'}
+Q9 Past Marketing: ${disc[8]||'unknown'}
+Q10 Ad Budget: ${disc[9]||'unknown'}
+
+Build a complete Month 1 campaign strategy including:
+1. Campaign objective and structure (campaigns, ad sets, ads)
+2. Audience targeting specifics (interests, demographics, exclusions)
+3. Budget allocation breakdown
+4. Creative strategy (what visuals and copy angles to test)
+5. Lead capture recommendation (landing page vs lead form)
+6. KPIs to watch and benchmarks to hit
+7. Week-by-week optimization plan
+
+Be specific. Monroe Michigan is a small market — factor that in.`;
+  }
+
+  const outputEl=type==='strategy'?(document.getElementById('strategy-ai-output')?'strategy-ai-output':'disc-ai-output'):'detail-ai-output';
+  await runAI(prompt, outputEl, title);
+}
+
+// ═══════════════════════════════════════════════════
+// STANDALONE AI TOOLS
+// ═══════════════════════════════════════════════════
+function updateAIPanel(){
+  const sel=document.getElementById('ai-client-select');
+  if(!sel) return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">— No client selected —</option>'+db.clients.map(c=>`<option value="${c.id}">${c.bizName||'Unnamed'} (${si(c.stage).label})</option>`).join('');
+  if(current)sel.value=current;
+}
+
+function openAITool(type){
+  const selId=document.getElementById('ai-client-select')?.value;
+  const c=selId?getRec(selId):null;
+  const modal=document.getElementById('aiModal');
+  const body=document.getElementById('ai-modal-body');
+  const title=document.getElementById('ai-modal-title');
+
+  if(type==='research'){
+    title.textContent='Prospect Researcher';
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Business Name</label><input class="fi" id="ai-biz" placeholder="e.g. Monroe Roofing Co." value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Industry</label><input class="fi" id="ai-ind" placeholder="e.g. Roofing, HVAC, Remodeling" value="${c?.industry||''}"/></div>
+      <div class="fs"><label class="fl">Website URL</label><input class="fi" id="ai-url" placeholder="https://..." value="${c?.website||''}"/></div>
+      <div class="fs"><label class="fl">Any Known Intel</label><textarea class="fta" id="ai-intel" rows="3" placeholder="Anything you already know...">${c?.intel||''}</textarea></div>
+      <button class="btn-ai" onclick="runStandaloneAI('research')">🔍 Research This Prospect</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+  else if(type==='adcopy'){
+    title.textContent='Ad Copy Generator';
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Business / Client</label><input class="fi" id="ai-biz" placeholder="e.g. Monroe Roofing Co." value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Industry</label><input class="fi" id="ai-ind" placeholder="Roofing, HVAC, Decks..." value="${c?.industry||''}"/></div>
+      <div class="fs"><label class="fl">Main Service to Promote</label><input class="fi" id="ai-service" placeholder="e.g. Roof replacements, free inspection offer"/></div>
+      <div class="fs"><label class="fl">Target Customer</label><input class="fi" id="ai-target" placeholder="e.g. Homeowners 35–65, Monroe MI" value="${c?.discovery?.[5]||''}"/></div>
+      <div class="fs"><label class="fl">Average Job Value</label><input class="fi" id="ai-jv" placeholder="e.g. $8,000" value="${c?.jobValue||''}"/></div>
+      <button class="btn-ai" onclick="runStandaloneAI('adcopy')">✍️ Generate 5 Ad Variations</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+  else if(type==='outreach'){
+    title.textContent='Outreach Writer';
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Business Name</label><input class="fi" id="ai-biz" placeholder="e.g. Tommy Savior" value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Owner Name</label><input class="fi" id="ai-owner" placeholder="e.g. Tommy" value="${c?.owner||''}"/></div>
+      <div class="fs"><label class="fl">Industry</label><input class="fi" id="ai-ind" placeholder="Roofing, HVAC..." value="${c?.industry||''}"/></div>
+      <div class="fs"><label class="fl">Key Intel / Selling Angle</label><textarea class="fta" id="ai-intel" rows="3" placeholder="What do you know about them? What's the hook?">${c?.intel||c?.angle||''}</textarea></div>
+      <div class="fs"><label class="fl">Type</label>
+        <select class="fse" id="ai-outtype">
+          <option value="email">Cold Email</option>
+          <option value="dm">Facebook/Instagram DM</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+      <button class="btn-ai" onclick="runStandaloneAI('outreach')">📩 Write Outreach Message</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+  else if(type==='proposal'){
+    title.textContent='Proposal Writer';
+    const disc=c?.discovery||[];
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Client Business</label><input class="fi" id="ai-biz" placeholder="Business name" value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Owner Name</label><input class="fi" id="ai-owner" value="${c?.owner||''}"/></div>
+      <div class="fs"><label class="fl">Industry</label><input class="fi" id="ai-ind" value="${c?.industry||''}"/></div>
+      <div class="fs"><label class="fl">Main Service</label><input class="fi" id="ai-service" value="${disc[1]||''}"/></div>
+      <div class="fs"><label class="fl">Average Job Value</label><input class="fi" id="ai-jv" value="${c?.jobValue||disc[2]||''}"/></div>
+      <div class="fs"><label class="fl">Ad Budget</label><input class="fi" id="ai-budget" value="${disc[9]||c?.adSpend||''}"/></div>
+      <div class="fs"><label class="fl">Goals (jobs/month wanted)</label><input class="fi" id="ai-goals" value="${disc[3]||''}"/></div>
+      <div class="fs"><label class="fl">Key Pain / Opportunity</label><textarea class="fta" id="ai-intel" rows="2">${c?.angle||c?.intel||''}</textarea></div>
+      <button class="btn-ai" onclick="runStandaloneAI('proposal')">📋 Generate Full Proposal</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+  else if(type==='diagnose'){
+    title.textContent='Campaign Doctor';
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Client</label><input class="fi" id="ai-biz" placeholder="Business name" value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Industry</label><input class="fi" id="ai-ind" value="${c?.industry||''}"/></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Paste your Meta Ads metrics below:</div>
+      <div class="fs"><div class="frow">
+        <div><label class="fl">Ad Spend ($)</label><input class="fi" id="ai-spend" type="number" placeholder="0"/></div>
+        <div><label class="fl">Leads</label><input class="fi" id="ai-leads" type="number" placeholder="0"/></div>
+      </div></div>
+      <div class="fs"><div class="frow">
+        <div><label class="fl">Clicks</label><input class="fi" id="ai-clicks" type="number" placeholder="0"/></div>
+        <div><label class="fl">Impressions</label><input class="fi" id="ai-impr" type="number" placeholder="0"/></div>
+      </div></div>
+      <div class="fs"><label class="fl">CPM ($)</label><input class="fi" id="ai-cpm" placeholder="e.g. 12.50"/></div>
+      <div class="fs"><label class="fl">What's the problem you're seeing?</label><textarea class="fta" id="ai-problem" rows="2" placeholder="e.g. CPL jumped from $18 to $47 this week, CTR dropped..."></textarea></div>
+      <button class="btn-ai" onclick="runStandaloneAI('diagnose')">📊 Diagnose Campaign</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+  else if(type==='strategy'){
+    title.textContent='Strategy Builder';
+    body.innerHTML=`
+      <div class="fs"><label class="fl">Client</label><input class="fi" id="ai-biz" placeholder="Business name" value="${c?.bizName||''}"/></div>
+      <div class="fs"><label class="fl">Industry / Service</label><input class="fi" id="ai-ind" value="${c?.industry||''}"/></div>
+      <div class="fs"><label class="fl">Monthly Budget</label><input class="fi" id="ai-budget" placeholder="e.g. $500/mo" value="${c?.adSpend||''}"/></div>
+      <div class="fs"><label class="fl">Target Customer</label><input class="fi" id="ai-target" placeholder="e.g. Homeowners 40+, Monroe MI" value="${c?.discovery?.[5]||''}"/></div>
+      <div class="fs"><label class="fl">Main Goal</label><input class="fi" id="ai-goals" placeholder="e.g. 6–8 deck jobs/month"/></div>
+      <div class="fs"><label class="fl">Past Marketing History</label><textarea class="fta" id="ai-intel" rows="2" placeholder="What have they tried before?">${c?.discovery?.[8]||''}</textarea></div>
+      <button class="btn-ai" onclick="runStandaloneAI('strategy')">🎯 Build Full Strategy</button>
+      <div id="ai-standalone-output"></div>`;
+  }
+
+  modal.classList.add('open');
+}
+
+async function runStandaloneAI(type){
+  const get=id=>document.getElementById(id)?.value?.trim()||'';
+  let prompt='', title='';
+
+  if(type==='research'){
+    title='Prospect Research';
+    prompt=`You are researching a prospect for a Meta ads agency pitch in Monroe Michigan.
+Business: ${get('ai-biz')} | Industry: ${get('ai-ind')} | Website: ${get('ai-url')}
+Known intel: ${get('ai-intel')}
+
+Provide:
+1. Likely marketing pain points for this type of ${get('ai-ind')} business
+2. What their ideal Meta ads funnel looks like
+3. Specific outreach angle to use
+4. Key questions to ask on discovery call
+5. Estimated potential value as a client (monthly retainer range)`;
+  }
+  else if(type==='adcopy'){
+    title='Ad Copy';
+    prompt=`Write 5 Meta ad variations for ${get('ai-biz')}, a ${get('ai-ind')} company in Monroe Michigan.
+Main service: ${get('ai-service')} | Target: ${get('ai-target')} | Job value: ${get('ai-jv')}
+
+For each of the 5 ads provide:
+- Hook/headline (under 40 chars, scroll-stopping)
+- Primary text (under 125 chars)
+- CTA button
+- Why this angle works
+
+Angles: 1) Season hook 2) Problem/solution 3) Social proof 4) Direct offer 5) Urgency`;
+  }
+  else if(type==='outreach'){
+    title='Outreach Message';
+    const outtype=get('ai-outtype');
+    prompt=`Write cold outreach for a Meta ads specialist at Varney Digital Media targeting:
+Business: ${get('ai-biz')} | Owner: ${get('ai-owner')} | Industry: ${get('ai-ind')} | Location: Monroe Michigan
+Intel/angle: ${get('ai-intel')}
+
+Write ${outtype==='both'?'both a cold email (with subject line) AND a short Facebook DM':outtype==='email'?'a cold email with subject line':'a short Facebook/Instagram DM'}.
+Rules: Lead with their problem not "I do ads". Reference specific intel. End with clear CTA. Sign off as Varney Digital Media.`;
+  }
+  else if(type==='proposal'){
+    title='Client Proposal';
+    prompt=`Write a complete Meta ads proposal for:
+Client: ${get('ai-biz')} | Owner: ${get('ai-owner')} | Industry: ${get('ai-ind')}
+Main service: ${get('ai-service')} | Job value: ${get('ai-jv')} | Budget: ${get('ai-budget')} | Goal: ${get('ai-goals')} jobs/month
+Pain/opportunity: ${get('ai-intel')}
+
+Structure the proposal with:
+1. The Opportunity (their specific situation)
+2. Our Strategy (what we'll run and why)
+3. Month 1 Plan (specific campaigns, audiences, creative)
+4. Investment breakdown (fee + ad spend + what's included)
+5. Expected results (be realistic, frame against job value)
+6. Next steps
+
+Sign off from Varney Digital Media. Professional but not stuffy.`;
+  }
+  else if(type==='diagnose'){
+    title='Campaign Diagnosis';
+    const spend=get('ai-spend'),leads=get('ai-leads'),clicks=get('ai-clicks'),impr=get('ai-impr'),cpm=get('ai-cpm');
+    const cpl=leads>0?(spend/leads).toFixed(2):'N/A';
+    const ctr=impr>0?((clicks/impr)*100).toFixed(2)+'%':'N/A';
+    prompt=`You are a Meta ads expert diagnosing a campaign for ${get('ai-biz')} (${get('ai-ind')}) in Monroe Michigan.
+
+Metrics: Spend $${spend} | Leads ${leads} | Clicks ${clicks} | Impressions ${impr} | CPM $${cpm}
+Calculated: CPL $${cpl} | CTR ${ctr}
+Problem reported: ${get('ai-problem')}
+
+Diagnose:
+1. What's the primary issue (creative, audience, offer, or landing page)?
+2. Specific fixes to make in Meta Ads Manager right now
+3. What to test next week
+4. What good performance benchmarks look like for this industry
+Be direct and specific — no generic advice.`;
+  }
+  else if(type==='strategy'){
+    title='Campaign Strategy';
+    prompt=`Build a complete Meta ads campaign strategy for:
+Client: ${get('ai-biz')} | Industry: ${get('ai-ind')} | Budget: ${get('ai-budget')}
+Target: ${get('ai-target')} | Goal: ${get('ai-goals')} | Past marketing: ${get('ai-intel')}
+Location: Monroe Michigan (small market — factor this in)
+
+Deliver:
+1. Campaign structure (how many campaigns, ad sets, targeting)
+2. Audience strategy (cold interests, lookalikes when available, retargeting)
+3. Budget split (% per campaign)
+4. Creative direction (what to shoot/show, copy angles)
+5. Lead capture method (lead form vs landing page)
+6. Week 1–4 optimization plan
+7. KPIs and benchmarks`;
+  }
+
+  await runAI(prompt, 'ai-standalone-output', title);
+}
+
+function closeAIModal(){document.getElementById('aiModal').classList.remove('open');}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS & SYNC
+// ═══════════════════════════════════════════════════
+function saveAPIKey(){
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!key){showToast('Paste your API key first');return;}
+  apiKey=key; localStorage.setItem(AKEY,key); showToast('✓ API key saved — AI tools ready');
+}
+
+function updateSyncUI(){
+  const dot=document.getElementById('syncDot'),b=document.getElementById('syncBanner');
+  if(scriptUrl){dot.style.background='var(--green)';if(b)b.classList.add('show');}
+  else{dot.style.background='var(--text3)';if(b)b.classList.remove('show');}
+}
+
+function syncToSheets(silent){
+  if(!scriptUrl) return;
+  fetch(scriptUrl,{method:'POST',body:JSON.stringify(db),headers:{'Content-Type':'application/json'}})
+  .then(r=>r.json())
+  .then(data=>{
+    document.getElementById('syncDot').style.background=data.status==='ok'?'var(--green)':'var(--red)';
+    if(!silent)showToast(data.status==='ok'?'☁️ Synced to Google Sheets':'Sync error — check URL');
+  })
+  .catch(()=>{document.getElementById('syncDot').style.background='var(--red)';if(!silent)showToast('Sync failed');});
+}
+
+function schedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToSheets(true),3000);}
+function manualSync(){if(!scriptUrl){openSettings();return;}syncToSheets(false);}
+
+function openSettings(){
+  const el=document.getElementById('scriptUrl'); if(el)el.value=scriptUrl||'';
+  const ak=document.getElementById('api-key-input'); if(ak)ak.value=apiKey||'';
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+function saveScriptUrl(){
+  const url=document.getElementById('scriptUrl').value.trim();
+  if(!url){showToast('Paste Web App URL first');return;}
+  scriptUrl=url; localStorage.setItem(SKEY,url); updateSyncUI(); closeSettings(); syncToSheets(false);
+}
+function disconnectSheets(){
+  if(!confirm('Disconnect Google Sheets?'))return;
+  scriptUrl=''; localStorage.removeItem(SKEY); updateSyncUI(); closeSettings(); showToast('Disconnected');
+}
+function copyScript(){
+  const code=document.getElementById('theScript').textContent;
+  navigator.clipboard.writeText(code).then(()=>showToast('Script copied!')).catch(()=>showToast('Select and copy manually'));
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('Copied!')).catch(()=>showToast('Copy failed'));
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+loadDB(); renderDash(); renderPipeline(); renderClients(); renderAlerts(); updateBadges(); updateSyncUI(); updateAIPanel();
+</script>
+</body>
+</html>
