@@ -301,7 +301,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
   <div class="nav-right">
     <div class="nav-icon" id="alert-btn" onclick="switchTab('alerts')" title="Follow-up alerts">🔔<div class="sync-dot" id="alert-dot" style="background:var(--text3)"></div></div>
-    <div class="nav-icon" onclick="manualSync()" title="Sync">☁️<div class="sync-dot" id="syncDot"></div></div>
+    <div class="nav-icon" onclick="exportData()" title="Export backup">💾</div>
+    <div class="nav-icon" onclick="document.getElementById('importFile').click()" title="Import backup">📂</div>
+    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)"/>
     <div class="nav-icon" onclick="openSettings()">⚙️</div>
     <button class="add-btn" onclick="openAddModal()">+ Add</button>
   </div>
@@ -1597,6 +1599,52 @@ function copyText(text){
 // ═══════════════════════════════════════════════════
 // TOAST
 // ═══════════════════════════════════════════════════
+function exportData(){
+  const timestamp = new Date().toISOString().slice(0,10);
+  const filename = 'varney-crm-backup-' + timestamp + '.json';
+  const dataStr = JSON.stringify(db, null, 2);
+  const blob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup downloaded — ' + filename);
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const imported = JSON.parse(e.target.result);
+      if(!imported.clients || !Array.isArray(imported.clients)){
+        showToast('❌ Invalid backup file');
+        return;
+      }
+      if(!confirm('Import ' + imported.clients.length + ' records? This will replace your current data.')) return;
+      db = imported;
+      saveDB();
+      renderDash();
+      renderPipeline();
+      renderClients();
+      renderAlerts();
+      updateBadges();
+      updateAIPanel();
+      showToast('✅ Imported ' + imported.clients.length + ' records successfully');
+    } catch(e) {
+      showToast('❌ Could not read backup file');
+    }
+  };
+  reader.readAsText(file);
+  // Reset file input so same file can be imported again if needed
+  event.target.value = '';
+}
+
 function showToast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
